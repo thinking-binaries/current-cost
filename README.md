@@ -4,8 +4,8 @@ Simple receiver for current_cost IAM watt data.
 The Current Cost IAM (Individual Appliance Monitor) is a plug-in
 energy monitor that sends Watt readings every 6 seconds.
 
-It is well documented here: http://http://www.currentcost.com/
-Although I think the company behind it went bust a while ago.
+It is well documented here: http://www.currentcost.com/
+although I think the company behind it went bust a while ago.
 
 This repository provides code that runs on an ATTiny85 from Atmel,
 that talks to a HopeRFM69CW module and receives and decodes the
@@ -50,6 +50,7 @@ Arduino IDE with SPI and Serial libraries if you wanted (see below).
 make sure there is a build/tmp directory.
 ```
 cd build
+mkdir tmp
 ```
 
 make sure the TOOLDIR constant in the build/makefile is correct for your
@@ -71,18 +72,25 @@ Make the code
 ./make_ccost
 ```
 
-Program the fuses on your ATTiny85
+Program the fuses on your ATTiny85, so it uses the RC oscillator
+at 8MHz (instead of the factory default 1MHz) to get the correct
+timing for the serial port. You only have to do this once for
+any new chip, as it retains the values across flash cycles.
 
 ```
-./make_ccost write_fuses
+./make_ccost set-fuses
 ```
 
-Program the code on your ATTiny85
+Program the code on your ATTiny85. I use an Arduino UNO in ArduinoISP mode
+and connect the 6 wires to the ATTiny85 (reset, gnd, 3v3, MOSI, MISO SCLK)
+as detailed in the 'Arduino as ISP' sketch).
+
 ```
 ./make_ccost program
 ```
 
-Clean out any generated files
+Clean out any generated files, before you check this code back into a
+source code repository.
 ```
 ./make_ccost clean
 ```
@@ -108,6 +116,26 @@ be re-assigned to any pin. If porting to the Arduino libraries, you probably
 just want to ditch this file, and use the standard Arduino ports that are
 used with the Arduino SPI and Serial libraries.
 
+
+## Warning about different RFM69 radio types
+
+The RFM69 chip from HopeRF (and modules and breakout boards) come in
+various shapes and sizes. Some run at 3V3, some run at 5V. The 5V
+ones have a level shifter on so you can use them with a real Arduino.
+I power my ATTiny85 from two AA cells at 3V, but beware that the RFM
+chip is 3V3 device. I also use a FTDI-TTL232-3V3-WE serial/USB lead
+from EasySync to get serial data into my Mac - make sure you use the
+correct voltage level for the radio board you have.
+
+The RFM69HCW part (specifically as fitted to the SparkFun breakout
+board listed above) is a high power part (H means High Power) and
+uses a different output path for transmits. You won't use transmit
+on this project, but if you further use the radio for other
+transmit uses, note that there are comments in the ism.c file
+showing registers you change for the low power or high power
+radios (as you won't get any transmit energy into the aerial
+if you use the wrong configuration for that radio/module/board).
+Basically, the HCW part transmits via the PA_BOOST pin.
 
 David Whale
 
