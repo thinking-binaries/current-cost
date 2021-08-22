@@ -35,9 +35,7 @@ typedef uint8_t RFM69_MODE;
 #define RFM69_MODE_TX 2
 
 typedef uint8_t RFM69_CONFIG;
-//#define RFM69_CONFIG_ENG_OOK    0
-//#define RFM69_CONFIG_ENG_FSK    1
-#define RFM69_CONFIG_CC_FSK     2
+#define RFM69_CONFIG_CC_FSK     0
 #define RFM69_CONFIG_NONE       255
 
 RFM69_RESULT rfm69_init(void);

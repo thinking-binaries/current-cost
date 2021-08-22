@@ -208,83 +208,6 @@ typedef struct
 
 //===== RADIO CONFIGS ==========================================================
 
-//----- ENERGENIE OOK ----------------------------------------------------------
-static const RFM69_CONFIG_REC _config_ENG_OOK[] = {
-    // RFM69HCW (high power)
-    {HRF_ADDR_PALEVEL,        0x7F},                        // RFM69HCW high power PA_BOOST PA1+PA2
-    {HRF_ADDR_OCP,            0x00},                        // RFM69HCW over current protect off
-    // RFM69 (low power)
-    //{HRF_ADDR_PALEVEL,        0x9F},                      // RMF69 (Energenie RT board) 13dBm, PA0=ON
-
-    // OOK specific
-    {HRF_ADDR_AFCCTRL,        0x20},                        // Improved AFC
-    {HRF_ADDR_LNA,            0x00},                        // LNA 50ohm, set by AGC loop
-    {HRF_ADDR_RSSITHRESH,     0xF0},                        // 120*2
-    {HRF_ADDR_DIOMAPPING1,    0x04},                        // DIO2=DATA in TX/RX
-    {HRF_ADDR_DATAMODUL,      HRF_VAL_DATAMODUL_OOK},       // modulation scheme OOK
-    {HRF_ADDR_FDEVMSB,        0},                           // frequency deviation:0kHz
-    {HRF_ADDR_FDEVLSB,        0},                           // frequency deviation:0kHz
-    {HRF_ADDR_FRMSB,          HRF_VAL_FRMSB433},            // carrier freq:433.92MHz 0x6C7AE1
-    {HRF_ADDR_FRMID,          HRF_VAL_FRMID433},            // carrier freq:433.92MHz 0x6C7AE1
-    {HRF_ADDR_FRLSB,          HRF_VAL_FRLSB433},            // carrier freq:433.92MHz 0x6C7AE1
-    {HRF_ADDR_RXBW,           HRF_VAL_RXBW120},             // channel filter bandwidth:120kHz
-    {HRF_ADDR_BITRATEMSB,     0x1A},                        // bitrate:4800/4 = 1202 real bps
-    {HRF_ADDR_BITRATELSB,     0x00},                        // bitrate:4800/4 = 1202 real bps
-    {HRF_ADDR_PREAMBLEMSB,    0},                           // preamble size MSB
-    {HRF_ADDR_PREAMBLELSB,    0},                           // preamble size LSB
-    {HRF_ADDR_SYNCCONFIG,     HRF_VAL_SYNCCONFIG0},         // Size of sync word (disabled)
-    {HRF_ADDR_PACKETCONFIG1,  0x80},                        // Tx Variable length, no Manchester coding
-    {HRF_ADDR_PAYLOADLEN,     0}                            // no payload length
-};
-#define CONFIG_ENG_OOK_COUNT (sizeof(_config_ENG_OOK)/sizeof(RFM69_CONFIG_REC))
-
-//static const RFM69_CONFIG_REC _config_tx_high[] = {
-//    {HRF_ADDR_TESTPA1,        0x5D},                        // 20dBm mode
-//    {HRF_ADDR_TESTPA2,        0x7C}                         // 20dBm mode
-//};
-
-//static const RFM69_CONFIG_REC _config_tx_low[] = {
-//    {HRF_ADDR_TESTPA1,        0x55},                        // normal mode
-//    {HRF_ADDR_TESTPA2,        0x70}                         // normal mode
-//};
-
-
-//----- ENERGENIE FSK ----------------------------------------------------------
-#define RADIO_VAL_SYNCVALUE1FSK          0x2D               // 1st byte of Sync word
-#define RADIO_VAL_SYNCVALUE2FSK          0xD4               // 2nd byte of Sync word
-#define RADIO_VAL_SYNCVALUE1OOK          0x80               // 1st byte of Sync word
-//#define RADIO_VAL_PACKETCONFIG1FSK       0xA2             // Variable length, Manchester coding, Addr must match NodeAddress
-#define RADIO_VAL_PACKETCONFIG1FSKNO     0xA0               // Variable length, Manchester coding
-
-static const RFM69_CONFIG_REC _config_ENG_FSK[] = {
-    // RFM69HCW (high power)
-    {HRF_ADDR_PALEVEL,        0x7F},                        // RFM69HCW high power PA_BOOST PA1+PA2
-    {HRF_ADDR_OCP,            0x00},                        // RFM69HCW over current protect off
-    // RFM69 (low power)
-    //{HRF_ADDR_PALEVEL,        0x9F},                      // RMF69 (Energenie RT board) 13dBm, PA0=ON
-
-    // FSK specific
-    {HRF_ADDR_DATAMODUL,          HRF_VAL_DATAMODUL_FSK},   // modulation scheme FSK
-    {HRF_ADDR_AFCCTRL,            HRF_VAL_AFCCTRLS},        // standard AFC routine
-    {HRF_ADDR_LNA,                HRF_VAL_LNA50},           // 200ohms, gain by AGC loop -> 50ohms
-    //{HRF_ADDR_RSSITHRESH,     0xF0},                      // 120*2
-    {HRF_ADDR_FDEVMSB,            HRF_VAL_FDEVMSB30},       // frequency deviation 5kHz 0x0052 -> 30kHz 0x01EC
-    {HRF_ADDR_FDEVLSB,            HRF_VAL_FDEVLSB30},       // frequency deviation 5kHz 0x0052 -> 30kHz 0x01EC
-    {HRF_ADDR_FRMSB,              HRF_VAL_FRMSB434},        // carrier freq -> 434.3MHz 0x6C9333
-    {HRF_ADDR_FRMID,              HRF_VAL_FRMID434},        // carrier freq -> 434.3MHz 0x6C9333
-    {HRF_ADDR_FRLSB,              HRF_VAL_FRLSB434},        // carrier freq -> 434.3MHz 0x6C9333
-    {HRF_ADDR_RXBW,               HRF_VAL_RXBW60},          // channel filter bandwidth 10kHz -> 60kHz  page:26
-    {HRF_ADDR_BITRATEMSB,         0x1A},                    // 4800b/s
-    {HRF_ADDR_BITRATELSB,         0x0B},                    // 4800b/s
-    {HRF_ADDR_SYNCCONFIG,         HRF_VAL_SYNCCONFIG2},     // Size of the Sync word = 2 (SyncSize + 1)
-    {HRF_ADDR_SYNCVALUE1,         RADIO_VAL_SYNCVALUE1FSK}, // 1st byte of Sync word
-    {HRF_ADDR_SYNCVALUE2,         RADIO_VAL_SYNCVALUE2FSK}, // 2nd byte of Sync word
-    {HRF_ADDR_PACKETCONFIG1,      RADIO_VAL_PACKETCONFIG1FSKNO}, // Variable length, Manchester coding
-    {HRF_ADDR_PAYLOADLEN,         HRF_VAL_PAYLOADLEN66},    // max Length in RX, not used in Tx
-    {HRF_ADDR_NODEADRS,           0x06},                    // Node address used in address filtering (not used)
-};
-#define CONFIG_ENG_FSK_COUNT (sizeof(_config_ENG_FSK)/sizeof(RFM69_CONFIG_REC))
-
 
 //----- CURRENT COST FSK -------------------------------------------------------
 // The CC IAM sends 00 00 66 66 66 66 2D D4
@@ -340,8 +263,6 @@ static const struct
     uint8_t                count;
 } _configs[] =
 {
-    /* RFM69_CONFIG_ENG_OOK */ {_config_ENG_OOK, CONFIG_ENG_OOK_COUNT},
-    /* RFM69_CONFIG_ENG_FSK */ {_config_ENG_FSK, CONFIG_ENG_FSK_COUNT},
     /* RFM69_CONFIG_CC_FSK  */ {_config_CC_FSK,  CONFIG_CC_FSK_COUNT}
 };
 #define NUM_CONFIGS (sizeof(_configs)/sizeof(RFM69_CONFIG_REC *))
