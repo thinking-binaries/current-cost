@@ -165,7 +165,6 @@ static void loop(void)
     {
         if (RFM69_RESULT_OK == rfm69_rx(buf, sizeof(buf)))
         { // DECODE
-            buf[1] = 0x33; //TESTING: invalid decode test
 #if defined(DEBUG)
             ser_txromstr(STR_RAW);
             ser_hexbuf(buf, sizeof(buf));
