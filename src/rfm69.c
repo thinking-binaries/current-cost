@@ -1,11 +1,11 @@
-// ism.c  23/05/2021  D.J.Whale
+// rfm69.c  23/05/2021  D.J.Whale
 // Interface to an Industrial/Scientific/Medical band radio
 // based on:  hrf69.h  03/04/2016  D.J.Whale
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "ism.h"
+#include "rfm69.h"
 #include "spi.h"
 #include "ser.h"
 
@@ -20,19 +20,19 @@
 
 typedef struct
 {
-    ISM_MODE current_mode;
-    ISM_CONFIG config;
+    RFM69_MODE current_mode;
+    RFM69_CONFIG config;
     uint8_t radiover;
-} ISM_DATA;
+} RFM69_DATA;
 
-static ISM_DATA _ism_data = {ISM_MODE_STBY, ISM_CONFIG_NONE, 0};
+static RFM69_DATA _rfm69_data = {RFM69_MODE_STBY, RFM69_CONFIG_NONE, 0};
 
 
 typedef struct
 {
   uint8_t addr;
   uint8_t value;
-} ISM_CONFIG_REC;
+} RFM69_CONFIG_REC;
 
 
 // Register addresses - high bit clear for read, set for write.
@@ -209,7 +209,7 @@ typedef struct
 //===== RADIO CONFIGS ==========================================================
 
 //----- ENERGENIE OOK ----------------------------------------------------------
-static const ISM_CONFIG_REC _config_ENG_OOK[] = {
+static const RFM69_CONFIG_REC _config_ENG_OOK[] = {
     // RFM69HCW (high power)
     {HRF_ADDR_PALEVEL,        0x7F},                        // RFM69HCW high power PA_BOOST PA1+PA2
     {HRF_ADDR_OCP,            0x00},                        // RFM69HCW over current protect off
@@ -236,14 +236,14 @@ static const ISM_CONFIG_REC _config_ENG_OOK[] = {
     {HRF_ADDR_PACKETCONFIG1,  0x80},                        // Tx Variable length, no Manchester coding
     {HRF_ADDR_PAYLOADLEN,     0}                            // no payload length
 };
-#define CONFIG_ENG_OOK_COUNT (sizeof(_config_ENG_OOK)/sizeof(ISM_CONFIG_REC))
+#define CONFIG_ENG_OOK_COUNT (sizeof(_config_ENG_OOK)/sizeof(RFM69_CONFIG_REC))
 
-//static const ISM_CONFIG_REC _config_tx_high[] = {
+//static const RFM69_CONFIG_REC _config_tx_high[] = {
 //    {HRF_ADDR_TESTPA1,        0x5D},                        // 20dBm mode
 //    {HRF_ADDR_TESTPA2,        0x7C}                         // 20dBm mode
 //};
 
-//static const ISM_CONFIG_REC _config_tx_low[] = {
+//static const RFM69_CONFIG_REC _config_tx_low[] = {
 //    {HRF_ADDR_TESTPA1,        0x55},                        // normal mode
 //    {HRF_ADDR_TESTPA2,        0x70}                         // normal mode
 //};
@@ -256,7 +256,7 @@ static const ISM_CONFIG_REC _config_ENG_OOK[] = {
 //#define RADIO_VAL_PACKETCONFIG1FSK       0xA2             // Variable length, Manchester coding, Addr must match NodeAddress
 #define RADIO_VAL_PACKETCONFIG1FSKNO     0xA0               // Variable length, Manchester coding
 
-static const ISM_CONFIG_REC _config_ENG_FSK[] = {
+static const RFM69_CONFIG_REC _config_ENG_FSK[] = {
     // RFM69HCW (high power)
     {HRF_ADDR_PALEVEL,        0x7F},                        // RFM69HCW high power PA_BOOST PA1+PA2
     {HRF_ADDR_OCP,            0x00},                        // RFM69HCW over current protect off
@@ -283,7 +283,7 @@ static const ISM_CONFIG_REC _config_ENG_FSK[] = {
     {HRF_ADDR_PAYLOADLEN,         HRF_VAL_PAYLOADLEN66},    // max Length in RX, not used in Tx
     {HRF_ADDR_NODEADRS,           0x06},                    // Node address used in address filtering (not used)
 };
-#define CONFIG_ENG_FSK_COUNT (sizeof(_config_ENG_FSK)/sizeof(ISM_CONFIG_REC))
+#define CONFIG_ENG_FSK_COUNT (sizeof(_config_ENG_FSK)/sizeof(RFM69_CONFIG_REC))
 
 
 //----- CURRENT COST FSK -------------------------------------------------------
@@ -302,7 +302,7 @@ static const ISM_CONFIG_REC _config_ENG_FSK[] = {
 #define RADIO_VAL_CC_FRMID                  0x7A
 #define RADIO_VAL_CC_FRLSB                  0x3D
 
-static const ISM_CONFIG_REC _config_CC_FSK[] = {
+static const RFM69_CONFIG_REC _config_CC_FSK[] = {
     // RFM69HCW (high power)
     {HRF_ADDR_PALEVEL,        0x7F},                        // RFM69HCW high power PA_BOOST PA1+PA2
     {HRF_ADDR_OCP,            0x00},                        // RFM69HCW over current protect off
@@ -332,19 +332,19 @@ static const ISM_CONFIG_REC _config_CC_FSK[] = {
     {HRF_ADDR_PAYLOADLEN,         8}                         // Fixed number of receive bytes (manchester encoded doubles it)
 //    {HRF_ADDR_NODEADRS,           0x06},                    // Node address used in address filtering (not used)
 };
-#define CONFIG_CC_FSK_COUNT (sizeof(_config_CC_FSK)/sizeof(ISM_CONFIG_REC))
+#define CONFIG_CC_FSK_COUNT (sizeof(_config_CC_FSK)/sizeof(RFM69_CONFIG_REC))
 
 static const struct
 {
-    ISM_CONFIG_REC const * config;
+    RFM69_CONFIG_REC const * config;
     uint8_t                count;
 } _configs[] =
 {
-    /* ISM_CONFIG_ENG_OOK */ {_config_ENG_OOK, CONFIG_ENG_OOK_COUNT},
-    /* ISM_CONFIG_ENG_FSK */ {_config_ENG_FSK, CONFIG_ENG_FSK_COUNT},
-    /* ISM_CONFIG_CC_FSK  */ {_config_CC_FSK,  CONFIG_CC_FSK_COUNT}
+    /* RFM69_CONFIG_ENG_OOK */ {_config_ENG_OOK, CONFIG_ENG_OOK_COUNT},
+    /* RFM69_CONFIG_ENG_FSK */ {_config_ENG_FSK, CONFIG_ENG_FSK_COUNT},
+    /* RFM69_CONFIG_CC_FSK  */ {_config_CC_FSK,  CONFIG_CC_FSK_COUNT}
 };
-#define NUM_CONFIGS (sizeof(_configs)/sizeof(ISM_CONFIG_REC *))
+#define NUM_CONFIGS (sizeof(_configs)/sizeof(RFM69_CONFIG_REC *))
 
 
 //------------------------------------------------------------------------------
@@ -433,7 +433,7 @@ static void _wait_tx_ready(void)
 
 
 //------------------------------------------------------------------------------
-static void _config(ISM_CONFIG_REC const * p_config, uint8_t len)
+static void _config(RFM69_CONFIG_REC const * p_config, uint8_t len)
 {
     while (len-- != 0)
     {
@@ -446,35 +446,35 @@ static void _config(ISM_CONFIG_REC const * p_config, uint8_t len)
 //===== PUBLIC =================================================================
 
 //------------------------------------------------------------------------------
-ISM_RESULT ism_init(void)
+RFM69_RESULT rfm69_init(void)
 {
-    _ism_data.radiover = _readreg(HRF_ADDR_VERSION);
-    _ism_data.config   = ISM_CONFIG_NONE;
+    _rfm69_data.radiover = _readreg(HRF_ADDR_VERSION);
+    _rfm69_data.config   = RFM69_CONFIG_NONE;
 
-    if ((0x00 == _ism_data.radiover) || (0xFF == _ism_data.radiover))
+    if ((0x00 == _rfm69_data.radiover) || (0xFF == _rfm69_data.radiover))
     {
-        return ISM_RESULT_E_NORESPONSE;
+        return RFM69_RESULT_E_NORESPONSE;
     }
-    return ISM_RESULT_OK;
+    return RFM69_RESULT_OK;
 }
 
 //------------------------------------------------------------------------------
-uint8_t ism_radiover(void)
+uint8_t rfm69_radiover(void)
 {
-    return _ism_data.radiover;
+    return _rfm69_data.radiover;
 }
 
 //------------------------------------------------------------------------------
-ISM_RESULT ism_setmode(ISM_MODE mode)
+RFM69_RESULT rfm69_setmode(RFM69_MODE mode)
 {
     // Prevent HRF_MODE leaking via API
     static uint8_t _hrf_modes[] =
     {
-        /* ISM_MODE_STBY */ HRF_MODE_STANDBY,
-        /* ISM_MODE_RX   */ HRF_MODE_RECEIVER,
-        /* ISM_MODE_TX   */ HRF_MODE_TRANSMITTER
+        /* RFM69_MODE_STBY */ HRF_MODE_STANDBY,
+        /* RFM69_MODE_RX   */ HRF_MODE_RECEIVER,
+        /* RFM69_MODE_TX   */ HRF_MODE_TRANSMITTER
     };
-    if (mode >= sizeof(_hrf_modes)) {return ISM_RESULT_E_INVALID_PARAMETER;}
+    if (mode >= sizeof(_hrf_modes)) {return RFM69_RESULT_E_INVALID_PARAMETER;}
 
     uint8_t hrf_mode = _hrf_modes[mode];
     _writereg(HRF_ADDR_OPMODE, hrf_mode);
@@ -488,42 +488,42 @@ ISM_RESULT ism_setmode(ISM_MODE mode)
     //{
     //}
 
-    _ism_data.current_mode = mode;
-    return ISM_RESULT_OK;
+    _rfm69_data.current_mode = mode;
+    return RFM69_RESULT_OK;
 }
 
 
 //------------------------------------------------------------------------------
-ISM_RESULT ism_setconfig(ISM_CONFIG config)
+RFM69_RESULT rfm69_setconfig(RFM69_CONFIG config)
 {
     if ( config >= NUM_CONFIGS)
     {
-        return ISM_RESULT_E_INVALID_PARAMETER;
+        return RFM69_RESULT_E_INVALID_PARAMETER;
     }
 
     // only reconfigure if it actually changes
-    if (config != _ism_data.config)
+    if (config != _rfm69_data.config)
     {
         //ser_txstr("new config\r\n");
         _config(_configs[config].config, _configs[config].count);
-        _ism_data.config = config;
+        _rfm69_data.config = config;
     }
-    return ISM_RESULT_OK;
+    return RFM69_RESULT_OK;
 }
 
 //------------------------------------------------------------------------------
-ISM_CONFIG ism_getconfig(void)
+RFM69_CONFIG rfm69_getconfig(void)
 {
-    return _ism_data.config;
+    return _rfm69_data.config;
 }
 
 //------------------------------------------------------------------------------
-ISM_RESULT ism_tx(uint8_t * ppayload, uint8_t len, uint8_t times)
+RFM69_RESULT rfm69_tx(uint8_t * ppayload, uint8_t len, uint8_t times)
 {
     /* VALIDATE: Check input parameters are in range */
     if (0 == len) //TODO: make this an ASSERT()
     {
-        return ISM_RESULT_E_INVALID_PARAMETER;
+        return RFM69_RESULT_E_INVALID_PARAMETER;
     }
     if (0 == times)
     {
@@ -531,13 +531,13 @@ ISM_RESULT ism_tx(uint8_t * ppayload, uint8_t len, uint8_t times)
     }
     if (len > MAX_FIFO_BUFFER)
     {
-        return ISM_RESULT_E_BUFFER_TOO_SMALL;
+        return RFM69_RESULT_E_BUFFER_TOO_SMALL;
     }
 
-    uint8_t prevmode = _ism_data.current_mode;
-    if (prevmode != ISM_MODE_TX)
+    uint8_t prevmode = _rfm69_data.current_mode;
+    if (prevmode != RFM69_MODE_TX)
     {
-        ism_setmode(ISM_MODE_TX);
+        rfm69_setmode(RFM69_MODE_TX);
     }
 
     // Note, when PA starts up, radio inserts a 01 at start before any user data
@@ -576,32 +576,32 @@ ISM_RESULT ism_tx(uint8_t * ppayload, uint8_t len, uint8_t times)
     //uint8_t irqflags1 = _readreg(HRF_ADDR_IRQFLAGS1);
     uint8_t irqflags2 = _readreg(HRF_ADDR_IRQFLAGS2);
 
-    if (_ism_data.current_mode != prevmode)
+    if (_rfm69_data.current_mode != prevmode)
     {
-       ism_setmode(prevmode);
+       rfm69_setmode(prevmode);
     }
 
     /* CONFIRM: Was the transmit ok? */
     if (((irqflags2 & HRF_MASK_FIFONOTEMPTY) != 0) || ((irqflags2 & HRF_MASK_FIFOOVERRUN) != 0))
     {
-        return ISM_RESULT_E_OVERRUN;
+        return RFM69_RESULT_E_OVERRUN;
     }
-    return ISM_RESULT_OK;
+    return RFM69_RESULT_OK;
 }
 
 
 //------------------------------------------------------------------------------
-ISM_RESULT ism_receive_waiting(void)
+RFM69_RESULT rfm69_receive_waiting(void)
 {
     uint8_t irqflags2 = _readreg(HRF_ADDR_IRQFLAGS2);
 
     if ((irqflags2 & HRF_MASK_PAYLOADRDY) == HRF_MASK_PAYLOADRDY)
     {
-        return ISM_RESULT_I_READY;
+        return RFM69_RESULT_I_READY;
     }
     else
     {
-        return ISM_RESULT_I_NOTREADY;
+        return RFM69_RESULT_I_NOTREADY;
     }
 }
 
@@ -620,7 +620,7 @@ ISM_RESULT ism_receive_waiting(void)
 // quicker than it comes in on-air. You might get an overflow error if
 // data comes in quicker than it is read.
 
-ISM_RESULT ism_rxcbp(uint8_t * ppayload, uint8_t maxlen)
+RFM69_RESULT rfm69_rxcbp(uint8_t * ppayload, uint8_t maxlen)
 {
     uint8_t data;
 
@@ -635,7 +635,7 @@ ISM_RESULT ism_rxcbp(uint8_t * ppayload, uint8_t maxlen)
     if (data > maxlen)
     {
         spi_deselect();
-        return ISM_RESULT_E_BUFFER_TOO_SMALL;
+        return RFM69_RESULT_E_BUFFER_TOO_SMALL;
     }
 
     maxlen = data; /* now the expected payload length */
@@ -652,18 +652,18 @@ ISM_RESULT ism_rxcbp(uint8_t * ppayload, uint8_t maxlen)
     //if underflow, this is an error (reading out too quick)
     //if overflow, this is an error (not reading out quick enough)
     //if not empty at end, this is a warning (might be ok, but user might want to clear_fifo after)
-    return ISM_RESULT_OK;
+    return RFM69_RESULT_OK;
 }
 
 
 //------------------------------------------------------------------------------
-ISM_RESULT ism_rx(uint8_t * ppayload, uint8_t maxlen)
+RFM69_RESULT rfm69_rx(uint8_t * ppayload, uint8_t maxlen)
 {
     if (maxlen > MAX_FIFO_BUFFER)
     {  /* At the moment, the receiver cannot reliably cope with payloads > 1 FIFO buffer.
         * It *might* be able to in the future.
         */
-        return ISM_RESULT_E_LONG_PAYLOAD;
+        return RFM69_RESULT_E_LONG_PAYLOAD;
     }
 
     uint8_t data;
@@ -683,7 +683,7 @@ ISM_RESULT ism_rx(uint8_t * ppayload, uint8_t maxlen)
     //if underflow, this is an error (reading out too quick)
     //if overflow, this is an error (not reading out quick enough)
     //if not empty at end, this is a warning (might be ok, but user might want to clear_fifo after)
-    return ISM_RESULT_OK;
+    return RFM69_RESULT_OK;
 }
 
 // END

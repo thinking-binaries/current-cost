@@ -9,7 +9,7 @@
 #include "timer.h"
 #include "ser.h"
 #include "spi.h"
-#include "ism.h"
+#include "rfm69.h"
 
 #define CC_TYPE_METER   0x00
 #define CC_TYPE_COUNTER 0x04
@@ -82,10 +82,10 @@ static void setup(void)
     timer_start();   // 1uS tick service
     ser_as_tx();
     spi_init(SPI_CPOL0|SPI_CPHA0|SPI_CSPOL1);
-    ism_init();
-    ism_setmode(ISM_MODE_STBY);
-    ism_setconfig(ISM_CONFIG_CC_FSK);
-    ism_setmode(ISM_MODE_RX);
+    rfm69_init();
+    rfm69_setmode(RFM69_MODE_STBY);
+    rfm69_setconfig(RFM69_CONFIG_CC_FSK);
+    rfm69_setmode(RFM69_MODE_RX);
     sei(); // enable interrupts
 }
 
@@ -93,9 +93,9 @@ static void setup(void)
 static void loop(void)
 {
     uint8_t buf[8];
-    if (ISM_RESULT_I_READY == ism_receive_waiting())
+    if (RFM69_RESULT_I_READY == rfm69_receive_waiting())
     {
-        if (ISM_RESULT_OK == ism_rx(buf, sizeof(buf)))
+        if (RFM69_RESULT_OK == rfm69_rx(buf, sizeof(buf)))
         { // DECODE
             decode_payload(buf);
         }
