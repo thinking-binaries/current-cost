@@ -89,6 +89,19 @@ as detailed in the 'Arduino as ISP' sketch).
 ./make_ccost program
 ```
 
+Note, if all you have is a .hex file and want to flash it with ```avrdude```
+here is my command line for that, but change the paths and the serial port 
+identifier as appropriate to your system, before using it.
+
+Note that the early arduino's and IDE's (ArduinoAsISP) use the stk500v1 protocol,
+but the later ArduinoAsISP and IDE's seem to use stk500v2 protocol which is
+mostly incompatible and doesn't work if you use an IDE and a flashed ArduinoAsISP
+that are not matched.
+
+```
+/Applications/AdafruitArduino1.0.5.app/Contents/Resources/Java/hardware/tools/avr/bin/avrdude -C /Applications/AdafruitArduino1.0.5.app/Contents/Resources/Java/hardware/tools/avr/etc/avrdude.conf -p attiny85 -P/dev/tty.usbmodem1411 -b19200 -c stk500v1     -U flash:w:./tmp/src/exe/main.hex 
+```
+
 Clean out any generated files, before you check this code back into a
 source code repository.
 ```

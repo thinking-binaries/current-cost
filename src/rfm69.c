@@ -219,8 +219,8 @@ typedef struct
 #define RADIO_VAL_CC_SYNCVALUE2             0x2D
 #define RADIO_VAL_CC_SYNCVALUE3             0xD4
 
-//#define RADIO_VAL_CC_PACKETCONFIG1          0x00            // Fixed length, no Manchester, no addr
-#define RADIO_VAL_CC_PACKETCONFIG1          0x20            // 0010 0000 Fixed length, Manchester decoding, no addr
+#define RADIO_VAL_CC_PACKETCONFIG1          0x00            // Fixed length, no Manchester, no addr
+//#define RADIO_VAL_CC_PACKETCONFIG1          0x20            // 0010 0000 Fixed length, Manchester decoding, no addr
 #define RADIO_VAL_CC_FRMSB                  0x6C            // 433.91mHz
 #define RADIO_VAL_CC_FRMID                  0x7A
 #define RADIO_VAL_CC_FRLSB                  0x3D
@@ -252,7 +252,7 @@ static const RFM69_CONFIG_REC _config_CC_FSK[] = {
     {HRF_ADDR_SYNCVALUE3,         RADIO_VAL_CC_SYNCVALUE3}, // 3rd byte of Sync word
     {HRF_ADDR_PACKETCONFIG1,      RADIO_VAL_CC_PACKETCONFIG1},
 
-    {HRF_ADDR_PAYLOADLEN,         8}                         // Fixed number of receive bytes (manchester encoded doubles it)
+    {HRF_ADDR_PAYLOADLEN,         16}                         // Fixed number of receive bytes (manchester encoded doubles it)
 //    {HRF_ADDR_NODEADRS,           0x06},                    // Node address used in address filtering (not used)
 };
 #define CONFIG_CC_FSK_COUNT (sizeof(_config_CC_FSK)/sizeof(RFM69_CONFIG_REC))
